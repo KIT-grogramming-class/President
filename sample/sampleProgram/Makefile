@@ -6,8 +6,10 @@ CFLAGS   = -Wall -g
 CXXFLAGS = -Wall -g
 
 HEADERS = card.h cardset.h dealer.h gamestatus.h player.h \
-          simpleplayer.h defaultplayer.h thinkTA1.h 
-OBJS = card.o cardset.cpp dealer.o player.o simpleplayer.o defaultplayer.o
+          simpleplayer.h defaultplayer.h thinkTA1.h \
+          groupplayer.h
+OBJS = card.o cardset.o dealer.o player.o simpleplayer.o defaultplayer.o \
+       groupplayer.o
 
 .SUFFIXES: .o .cc .cpp .c++ .c
 
@@ -23,8 +25,25 @@ OBJS = card.o cardset.cpp dealer.o player.o simpleplayer.o defaultplayer.o
 all: daifugou
 	@echo "build finished."
 
-daifugou: daifugou.o $(OBJS) $(HEADERS) libplayingcards.a
-	$(CXX) daifugou.o $(OBJS) -o daifugou -L. -lplayingcards
+daifugou: daifugou.o $(OBJS) $(HEADERS) thinkTA1.o
+	$(CXX) daifugou.o $(OBJS) thinkTA1.o -o daifugou
+
+# プラットフォーム依存の thinkTA1.o を自動セットアップ
+# Linux: libplayingcards.a から取り出す
+# macOS arm64: macLib/thinkTA1-for-mac-arm64.o をコピー
+# macOS x86_64: macLib/thinkTA1-for-mac-x86-64.o をコピー
+thinkTA1.o:
+	@if [ "$$(uname)" = "Darwin" ]; then \
+	    if [ "$$(uname -m)" = "arm64" ]; then \
+	        cp ../macLib/thinkTA1-for-mac-arm64.o ./thinkTA1.o; \
+	    else \
+	        cp ../macLib/thinkTA1-for-mac-x86-64.o ./thinkTA1.o; \
+	    fi; \
+	    echo "thinkTA1.o set up for macOS"; \
+	else \
+	    ar x libplayingcards.a thinkTA1.o; \
+	    echo "thinkTA1.o extracted from libplayingcards.a"; \
+	fi
 
 lib: libplayingcards.a
 
