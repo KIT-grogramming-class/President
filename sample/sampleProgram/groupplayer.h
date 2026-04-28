@@ -54,10 +54,22 @@ private:
     int endgameLookahead(const std::vector<CardSet> &moves,
                          const GameStatus &gstat) const;
 
+    // ----- MCプレイアウト用 -----
+    // 終盤(handSize <= mcEndgame) で各候補手をMC評価して最良を返す
+    int mcPlayoutSelect(const std::vector<CardSet> &moves,
+                        const GameStatus &gstat) const;
+
+    bool useMCPlayout;        // true: 終盤でMCプレイアウトを使う
+    int  mcPlayoutSamples;    // プレイアウト回数
+    int  mcPlayoutThreshold;  // 手札枚数 <= これで発動
+
 public:
     Group1(const char *name = "Group1", bool mc = false, int samples = 20,
-           int egThreshold = 4)
-        : Player(name), useMC(mc), mcSamples(samples), endgameThreshold(egThreshold) {
+           int egThreshold = 4, bool mcPlayout = false, int playoutSamples = 15,
+           int playoutThreshold = 5)
+        : Player(name), useMC(mc), mcSamples(samples), endgameThreshold(egThreshold),
+          useMCPlayout(mcPlayout), mcPlayoutSamples(playoutSamples),
+          mcPlayoutThreshold(playoutThreshold) {
         played.clear();
     }
     ~Group1() { }

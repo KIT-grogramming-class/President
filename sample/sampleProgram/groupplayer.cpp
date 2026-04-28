@@ -407,6 +407,261 @@ int Group1::endgameLookahead(const std::vector<CardSet> &moves,
     return bestIdx;
 }
 
+// ----- MCプレイアウト用シミュレータ -----
+
+namespace {
+
+// ある手札・場札から合法手を列挙（任意の手に使える版）
+std::vector<CardSet> enumLegalForHand(const CardSet &hnd, const CardSet &pile) {
+    std::vector<CardSet> moves;
+    int leadSize = pile.size();
+    bool isLeader = (leadSize == 0);
+
+    int rankCount[14] = {0};
+    bool jokerHere = false;
+    Card jokerCard;
+    for (int i = 0; i < hnd.size(); i++) {
+        if (hnd.at(i).isJoker()) {
+            jokerHere = true;
+            jokerCard = hnd.at(i);
+        } else if (hnd.at(i).rank() >= 1 && hnd.at(i).rank() <= 13) {
+            rankCount[hnd.at(i).rank()]++;
+        }
+    }
+
+    Card lead;
+    if (!isLeader) {
+        for (int i = 0; i < pile.size(); i++) {
+            if (!pile.at(i).isJoker()) { lead = pile.at(i); break; }
+        }
+        if (lead.suit() == Card::SUIT_BLANK && pile.size() > 0) lead = pile.at(0);
+    }
+
+    int sizeMin = isLeader ? 1 : leadSize;
+    int sizeMax = isLeader ? 4 : leadSize;
+
+    for (int sz = sizeMin; sz <= sizeMax; sz++) {
+        for (int r = 1; r <= 13; r++) {
+            int useFromHand = std::min(rankCount[r], sz);
+            int needJoker = sz - useFromHand;
+            if (needJoker > 1) continue;
+            if (needJoker == 1 && !jokerHere) continue;
+            if (useFromHand == 0) continue;
+
+            if (!isLeader) {
+                Card test(Card::SUIT_SPADE, r);
+                if (!test.isGreaterThan(lead)) continue;
+            }
+
+            CardSet group;
+            for (int i = 0; i < hnd.size() && (int)group.size() < useFromHand; i++) {
+                if (!hnd.at(i).isJoker() && hnd.at(i).rank() == r) {
+                    group.insert(hnd.at(i));
+                }
+            }
+            if (needJoker == 1) group.insert(jokerCard);
+
+            if ((int)group.size() == sz) moves.push_back(group);
+        }
+    }
+
+    if (jokerHere) {
+        if (isLeader || (leadSize == 1 && !lead.isJoker())) {
+            CardSet g;
+            g.insert(jokerCard);
+            moves.push_back(g);
+        }
+    }
+
+    return moves;
+}
+
+// シンプルな貪欲方策: 最弱の合法手を選ぶ。なければ空集合（パス）
+CardSet greedyPickMove(const CardSet &hnd, const CardSet &pile) {
+    std::vector<CardSet> moves = enumLegalForHand(hnd, pile);
+    if (moves.empty()) return CardSet();
+
+    // 最弱（強度最大値が最小）を選ぶ
+    int bestIdx = 0;
+    int bestStrength = 100;
+    for (size_t i = 0; i < moves.size(); i++) {
+        int s = 0;
+        for (int j = 0; j < moves[i].size(); j++) {
+            int cs = moves[i].at(j).strength();
+            if (cs > s) s = cs;
+        }
+        if (s < bestStrength) {
+            bestStrength = s;
+            bestIdx = (int)i;
+        }
+    }
+    return moves[bestIdx];
+}
+
+// シミュレーション用ゲーム状態
+struct SimGame {
+    static const int MAX_PLAYERS = 8;
+    CardSet hands[MAX_PLAYERS];
+    CardSet pile;
+    int turnIdx;
+    int leaderIdx;
+    int passCount;
+    int finishedFlag[MAX_PLAYERS];
+    int finishOrder[MAX_PLAYERS];  // 上がった順のプレイヤー添字
+    int finishCount;
+    int numPlayers;
+    int myIdx;  // 自分の添字（ランク評価用）
+};
+
+// 1ステップ進める。return true if game continues
+bool simStep(SimGame &g) {
+    int activeCount = g.numPlayers - g.finishCount;
+    if (activeCount <= 1) return false;  // ゲーム終了
+
+    // 上がったプレイヤーをスキップ
+    int skipCount = 0;
+    while (g.finishedFlag[g.turnIdx] && skipCount < g.numPlayers) {
+        g.turnIdx = (g.turnIdx + 1) % g.numPlayers;
+        skipCount++;
+    }
+
+    // 場流し判定: 全員パスで一周
+    if (g.passCount >= activeCount - 1) {
+        g.pile.makeEmpty();
+        g.passCount = 0;
+        // リーダーが現在のターンプレイヤーになる（次はこの人から）
+        g.leaderIdx = g.turnIdx;
+    }
+
+    // 手を選ぶ
+    CardSet move = greedyPickMove(g.hands[g.turnIdx], g.pile);
+
+    if (!move.isEmpty()) {
+        // 出す
+        g.pile.makeEmpty();
+        g.pile.insert(move);
+        g.hands[g.turnIdx].remove(move);
+        g.leaderIdx = g.turnIdx;
+        g.passCount = 0;
+
+        if (g.hands[g.turnIdx].size() == 0) {
+            g.finishedFlag[g.turnIdx] = 1;
+            g.finishOrder[g.finishCount++] = g.turnIdx;
+        }
+    } else {
+        g.passCount++;
+    }
+
+    g.turnIdx = (g.turnIdx + 1) % g.numPlayers;
+    return true;
+}
+
+// プレイアウト実行（最大 maxSteps ステップ）
+// 戻り値: 自分の最終順位（0始まり、上がった順）
+int runPlayout(SimGame &g, int maxSteps = 500) {
+    for (int step = 0; step < maxSteps; step++) {
+        if (!simStep(g)) break;
+        if (g.finishedFlag[g.myIdx]) {
+            // 自分上がった
+            for (int i = 0; i < g.finishCount; i++) {
+                if (g.finishOrder[i] == g.myIdx) return i;
+            }
+            return g.finishCount;
+        }
+    }
+    // 上がれなかった → 残ったプレイヤーは席順で評価（最下位扱い）
+    // 簡略: handSize小さい順で並び替え（最下位を多めに見積もり）
+    return g.finishCount;  // 上がっていない人の中で最先頭
+}
+
+}  // namespace
+
+int Group1::mcPlayoutSelect(const std::vector<CardSet> &moves,
+                            const GameStatus &gstat) const {
+    if (moves.empty()) return -1;
+
+    // 場外プールを構築
+    std::vector<Card> pool;
+    pool.reserve(53);
+    for (int s = Card::SUIT_SPADE; s <= Card::SUIT_CLUB; s++) {
+        for (int r = 1; r <= 13; r++) {
+            Card c(s, r);
+            if (!hand.includes(c) && !played.includes(c)) pool.push_back(c);
+        }
+    }
+    Card joker(Card::SUIT_JOKER, Card::RANK_JOKER);
+    if (!hand.includes(joker) && !played.includes(joker)) pool.push_back(joker);
+
+    if (pool.empty()) return -1;
+
+    int K = mcPlayoutSamples;
+    int N = gstat.numPlayers;
+    int myIdx = gstat.turnIndex;
+
+    int bestIdx = -1;
+    double bestRank = 1e18;
+
+    for (size_t mi = 0; mi < moves.size(); mi++) {
+        const CardSet &m = moves[mi];
+
+        double sumRank = 0;
+        for (int k = 0; k < K; k++) {
+            // プール（自分手札・既出を除外）をシャッフル
+            std::shuffle(pool.begin(), pool.end(), g_rng);
+
+            // SimGame を初期化
+            SimGame g;
+            g.numPlayers = N;
+            g.myIdx = myIdx;
+            g.finishCount = 0;
+            for (int i = 0; i < N; i++) {
+                g.hands[i].clear();
+                g.finishedFlag[i] = 0;
+                g.finishOrder[i] = -1;
+            }
+            // 自分の手札（出す前）を設定し、その後の手札を入れる
+            CardSet myAfter(hand);
+            myAfter.remove(m);
+            g.hands[myIdx] = myAfter;
+
+            // 相手の手札をプールから配る
+            int idx = 0;
+            for (int i = 0; i < N; i++) {
+                if (i == myIdx) continue;
+                int n = gstat.numCards[i];
+                for (int j = 0; j < n && idx < (int)pool.size(); j++) {
+                    g.hands[i].insert(pool[idx++]);
+                }
+            }
+
+            // 場と状態を初期化
+            g.pile.makeEmpty();
+            g.pile.insert(m);  // 自分が今出した手
+            g.leaderIdx = myIdx;
+            g.passCount = 0;
+            g.turnIdx = (myIdx + 1) % N;
+
+            // もし自分の手で上がるなら即座に登録
+            if (myAfter.size() == 0) {
+                g.finishedFlag[myIdx] = 1;
+                g.finishOrder[g.finishCount++] = myIdx;
+            }
+
+            int myRank = runPlayout(g);
+            sumRank += myRank;
+        }
+        double avgRank = sumRank / K;
+
+        // ランクは小さい方が良い（0=1位）
+        if (avgRank < bestRank) {
+            bestRank = avgRank;
+            bestIdx = (int)mi;
+        }
+    }
+
+    return bestIdx;
+}
+
 // ----- インターフェース -----
 
 void Group1::ready() {
@@ -437,8 +692,13 @@ bool Group1::follow(const GameStatus &gstat, CardSet &cards) {
 
     int bestIdx = -1;
 
-    // 終盤ルックアヘッド（手札 <= 閾値）
-    if ((int)hand.size() <= endgameThreshold) {
+    // MCプレイアウト（手札 <= mcPlayoutThreshold）
+    // ルックアヘッドより優先（実際にゲームを回すので情報が多い）
+    if (useMCPlayout && (int)hand.size() <= mcPlayoutThreshold) {
+        bestIdx = mcPlayoutSelect(moves, gstat);
+    }
+    // 終盤ルックアヘッド（手札 <= endgameThreshold）
+    else if ((int)hand.size() <= endgameThreshold) {
         bestIdx = endgameLookahead(moves, gstat);
     }
 

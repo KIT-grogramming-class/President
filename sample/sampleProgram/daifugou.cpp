@@ -23,7 +23,7 @@ void registerPlayers(Dealer & d) {
     d.regist(new  SimplePlayer("Simple1 "));
     d.regist(new  SimplePlayer("Simple2 "));
     d.regist(new      ThinkTA1("ThinkTA1"));
-    d.regist(new        Group1("Group1  "));               // 解析的pass確率（v2.1）
+    d.regist(new        Group1("Group1  ", false, 20, 4, true, 15, 5));  // v2.7 (MC playout)
 }
 
 int main (int argc, char * const argv[]) {
