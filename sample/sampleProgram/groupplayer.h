@@ -21,6 +21,7 @@ private:
     CardSet played;       // ゲーム中に出たカードの累積
     bool    useMC;        // true: MCでpass確率を計算 / false: 解析的
     int     mcSamples;    // MCのサンプル数
+    int     endgameThreshold;  // 手札がこの枚数以下になったら終盤ルックアヘッド
 
     // 比較関数（弱い→強い順）
     static bool weakFirst(const Card &a, const Card &b) {
@@ -43,9 +44,20 @@ private:
 
     double scoreMove(const CardSet &move, const GameStatus &gstat) const;
 
+    // ----- 終盤ルックアヘッド用 -----
+    // 仮想的な手札からの「最少必要手数」を計算（簡易版: distinct rank数）
+    int minPlaysFromHand(const CardSet &h) const;
+
+    // 終盤ルックアヘッド: 手札 ≤ endgameThreshold で発動
+    // 各候補手 m について、出した後の手札を評価し、最良手を返す
+    // 返り値: 最良候補手のインデックス（moves配列内）。見つからなければ -1
+    int endgameLookahead(const std::vector<CardSet> &moves,
+                         const GameStatus &gstat) const;
+
 public:
-    Group1(const char *name = "Group1", bool mc = false, int samples = 20)
-        : Player(name), useMC(mc), mcSamples(samples) {
+    Group1(const char *name = "Group1", bool mc = false, int samples = 20,
+           int egThreshold = 4)
+        : Player(name), useMC(mc), mcSamples(samples), endgameThreshold(egThreshold) {
         played.clear();
     }
     ~Group1() { }

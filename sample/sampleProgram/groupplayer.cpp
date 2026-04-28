@@ -350,6 +350,63 @@ double Group1::scoreMove(const CardSet &move, const GameStatus &gstat) const {
     return score;
 }
 
+// ----- 終盤ルックアヘッド -----
+
+int Group1::minPlaysFromHand(const CardSet &h) const {
+    if (h.size() == 0) return 0;
+    int rankCount[14] = {0};
+    bool hasJokerLocal = false;
+    for (int i = 0; i < h.size(); i++) {
+        if (h.at(i).isJoker()) hasJokerLocal = true;
+        else if (h.at(i).rank() >= 1 && h.at(i).rank() <= 13)
+            rankCount[h.at(i).rank()]++;
+    }
+    int distinct = 0;
+    for (int r = 1; r <= 13; r++) if (rankCount[r] > 0) distinct++;
+    // ジョーカーは distinct >= 1 ならいずれかの組に吸収可能
+    if (distinct == 0 && hasJokerLocal) return 1;
+    return distinct;
+}
+
+int Group1::endgameLookahead(const std::vector<CardSet> &moves,
+                             const GameStatus &gstat) const {
+    if (moves.empty()) return -1;
+
+    int bestIdx = -1;
+    double bestVal = -1e18;
+
+    int currentMin = minPlaysFromHand(hand);
+
+    for (size_t i = 0; i < moves.size(); i++) {
+        const CardSet &m = moves[i];
+
+        // 出した後の手札を作る
+        CardSet remaining(hand);
+        remaining.remove(m);
+
+        int afterMin = minPlaysFromHand(remaining);
+
+        // 評価値:
+        //   1. 最少手数の減少量 (普通は1、無駄打ちなら0)
+        //   2. 残り手札のサイズ (少ないほど良い)
+        //   3. 既存スコア（通る確率や強さ）
+        double v = 0;
+        v += (currentMin - afterMin) * 10.0;        // 手数を減らす効果
+        v += (hand.size() - remaining.size()) * 2.0; // カード数を減らす効果（普通 = move.size()）
+        v += scoreMove(m, gstat) * 0.5;             // 既存評価との折衷
+        // 上がりは確実な最大値
+        if (remaining.size() == 0) v += 1000.0;
+        // 1手で上がれる残りなら高ボーナス
+        else if (afterMin <= 1) v += 50.0;
+
+        if (v > bestVal) {
+            bestVal = v;
+            bestIdx = (int)i;
+        }
+    }
+    return bestIdx;
+}
+
 // ----- インターフェース -----
 
 void Group1::ready() {
@@ -378,25 +435,34 @@ bool Group1::follow(const GameStatus &gstat, CardSet &cards) {
 
     if (moves.empty()) return true;
 
-    // パスの基準点：通常 0 だが、終盤はパスのコストが高いので負の値にする
-    double passBaseline = 0.0;
-    if (!isLeader) {
-        if (hand.size() <= 3) passBaseline = -10.0;  // 手札少ない時はほぼパスしない
-        else if (hand.size() <= 5) passBaseline = -3.0;
-    }
-
-    double bestScore = isLeader ? -1e18 : passBaseline;
     int bestIdx = -1;
 
-    for (size_t i = 0; i < moves.size(); i++) {
-        double s = scoreMove(moves[i], gstat);
-        if (s > bestScore) {
-            bestScore = s;
-            bestIdx = (int)i;
-        }
+    // 終盤ルックアヘッド（手札 <= 閾値）
+    if ((int)hand.size() <= endgameThreshold) {
+        bestIdx = endgameLookahead(moves, gstat);
     }
 
-    if (bestIdx == -1) return true;
+    if (bestIdx == -1) {
+        // 通常評価: 各手をスコアリングして最高得点を選ぶ
+        // パスの基準点（通常 0、終盤はパスのコストが高い）
+        double passBaseline = 0.0;
+        if (!isLeader) {
+            if ((int)hand.size() <= 3) passBaseline = -10.0;
+            else if ((int)hand.size() <= 5) passBaseline = -3.0;
+        }
+
+        double bestScore = isLeader ? -1e18 : passBaseline;
+
+        for (size_t i = 0; i < moves.size(); i++) {
+            double s = scoreMove(moves[i], gstat);
+            if (s > bestScore) {
+                bestScore = s;
+                bestIdx = (int)i;
+            }
+        }
+
+        if (bestIdx == -1) return true;
+    }
 
     cards = moves[bestIdx];
     hand.remove(cards);
