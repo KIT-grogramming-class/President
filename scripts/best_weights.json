@@ -1,0 +1,400 @@
+{
+  "best_wins": 278,
+  "best_score": 3140,
+  "best_weights": {
+    "W_PASS": 3.7008700703042994,
+    "W_WEAK": 1.0999999999999999,
+    "W_JOKER": 8.0,
+    "W_PAIR": 4.0,
+    "W_DANGER": 2.1829401594190587,
+    "W_MINOPP": 4.0,
+    "W_ENDGAME": 3.3,
+    "W_ENDGAME_DEEP": 3.0,
+    "W_LEADER_WEAK": 0.6166318672194535,
+    "W_MULTI_LEAD": 1.5,
+    "W_ONE_MORE": 25.0
+  },
+  "n_games": 800,
+  "history": [
+    {
+      "iter": 0,
+      "wins": 258,
+      "score": 3106,
+      "weights": {
+        "W_PASS": 3.0,
+        "W_WEAK": 1.2,
+        "W_JOKER": 8.0,
+        "W_PAIR": 4.0,
+        "W_DANGER": 3.0,
+        "W_MINOPP": 4.0,
+        "W_ENDGAME": 3.0,
+        "W_ENDGAME_DEEP": 3.0,
+        "W_LEADER_WEAK": 0.5,
+        "W_MULTI_LEAD": 1.5,
+        "W_ONE_MORE": 25.0
+      },
+      "accepted": true
+    },
+    {
+      "iter": 1,
+      "wins": 248,
+      "score": 3083,
+      "weights": {
+        "W_PASS": 3.0,
+        "W_WEAK": 1.2,
+        "W_JOKER": 8.825759870517796,
+        "W_PAIR": 4.0,
+        "W_DANGER": 3.0,
+        "W_MINOPP": 4.0,
+        "W_ENDGAME": 3.3,
+        "W_ENDGAME_DEEP": 2.6886020886322815,
+        "W_LEADER_WEAK": 0.5,
+        "W_MULTI_LEAD": 1.5,
+        "W_ONE_MORE": 25.0
+      },
+      "accepted": false
+    },
+    {
+      "iter": 2,
+      "wins": 270,
+      "score": 3160,
+      "weights": {
+        "W_PASS": 3.7008700703042994,
+        "W_WEAK": 1.2,
+        "W_JOKER": 8.0,
+        "W_PAIR": 4.0,
+        "W_DANGER": 2.7507803055138993,
+        "W_MINOPP": 4.0,
+        "W_ENDGAME": 3.0,
+        "W_ENDGAME_DEEP": 3.0,
+        "W_LEADER_WEAK": 0.6166318672194535,
+        "W_MULTI_LEAD": 1.5,
+        "W_ONE_MORE": 25.0
+      },
+      "accepted": true
+    },
+    {
+      "iter": 3,
+      "wins": 268,
+      "score": 3143,
+      "weights": {
+        "W_PASS": 4.119738930747561,
+        "W_WEAK": 1.2,
+        "W_JOKER": 8.0,
+        "W_PAIR": 4.346468023718948,
+        "W_DANGER": 2.7507803055138993,
+        "W_MINOPP": 4.0,
+        "W_ENDGAME": 3.0,
+        "W_ENDGAME_DEEP": 3.0,
+        "W_LEADER_WEAK": 0.6166318672194535,
+        "W_MULTI_LEAD": 1.5,
+        "W_ONE_MORE": 22.75
+      },
+      "accepted": false
+    },
+    {
+      "iter": 4,
+      "wins": 235,
+      "score": 3058,
+      "weights": {
+        "W_PASS": 3.7008700703042994,
+        "W_WEAK": 1.2,
+        "W_JOKER": 8.4,
+        "W_PAIR": 4.72186511338593,
+        "W_DANGER": 2.7507803055138993,
+        "W_MINOPP": 4.0,
+        "W_ENDGAME": 3.0,
+        "W_ENDGAME_DEEP": 3.0,
+        "W_LEADER_WEAK": 0.6166318672194535,
+        "W_MULTI_LEAD": 1.7246422292263843,
+        "W_ONE_MORE": 25.0
+      },
+      "accepted": false
+    },
+    {
+      "iter": 5,
+      "wins": 236,
+      "score": 3079,
+      "weights": {
+        "W_PASS": 3.965445175390681,
+        "W_WEAK": 1.2,
+        "W_JOKER": 6.8018089354832725,
+        "W_PAIR": 4.0,
+        "W_DANGER": 2.7507803055138993,
+        "W_MINOPP": 4.0,
+        "W_ENDGAME": 3.0,
+        "W_ENDGAME_DEEP": 3.0,
+        "W_LEADER_WEAK": 0.6166318672194535,
+        "W_MULTI_LEAD": 1.5,
+        "W_ONE_MORE": 22.75
+      },
+      "accepted": false
+    },
+    {
+      "iter": 6,
+      "wins": 233,
+      "score": 3042,
+      "weights": {
+        "W_PASS": 3.7008700703042994,
+        "W_WEAK": 1.2,
+        "W_JOKER": 8.0,
+        "W_PAIR": 3.5017941841270552,
+        "W_DANGER": 2.7507803055138993,
+        "W_MINOPP": 4.0,
+        "W_ENDGAME": 3.3,
+        "W_ENDGAME_DEEP": 3.3,
+        "W_LEADER_WEAK": 0.6166318672194535,
+        "W_MULTI_LEAD": 1.5,
+        "W_ONE_MORE": 25.0
+      },
+      "accepted": false
+    },
+    {
+      "iter": 7,
+      "wins": 234,
+      "score": 3042,
+      "weights": {
+        "W_PASS": 3.7008700703042994,
+        "W_WEAK": 1.4112653215211677,
+        "W_JOKER": 7.17416037582759,
+        "W_PAIR": 4.0,
+        "W_DANGER": 2.7507803055138993,
+        "W_MINOPP": 4.0,
+        "W_ENDGAME": 3.0,
+        "W_ENDGAME_DEEP": 3.0,
+        "W_LEADER_WEAK": 0.7102137224433425,
+        "W_MULTI_LEAD": 1.5,
+        "W_ONE_MORE": 25.0
+      },
+      "accepted": false
+    },
+    {
+      "iter": 8,
+      "wins": 253,
+      "score": 3149,
+      "weights": {
+        "W_PASS": 3.7008700703042994,
+        "W_WEAK": 1.2,
+        "W_JOKER": 8.0,
+        "W_PAIR": 4.0,
+        "W_DANGER": 2.7507803055138993,
+        "W_MINOPP": 3.4296821050957575,
+        "W_ENDGAME": 3.0,
+        "W_ENDGAME_DEEP": 2.332914365185402,
+        "W_LEADER_WEAK": 0.6166318672194535,
+        "W_MULTI_LEAD": 1.2487473385246095,
+        "W_ONE_MORE": 25.0
+      },
+      "accepted": false
+    },
+    {
+      "iter": 9,
+      "wins": 232,
+      "score": 3029,
+      "weights": {
+        "W_PASS": 2.8426451769191194,
+        "W_WEAK": 1.2,
+        "W_JOKER": 9.494516793849595,
+        "W_PAIR": 4.0,
+        "W_DANGER": 2.7507803055138993,
+        "W_MINOPP": 4.0,
+        "W_ENDGAME": 3.0,
+        "W_ENDGAME_DEEP": 3.0,
+        "W_LEADER_WEAK": 0.6166318672194535,
+        "W_MULTI_LEAD": 1.3,
+        "W_ONE_MORE": 25.0
+      },
+      "accepted": false
+    },
+    {
+      "iter": 10,
+      "wins": 233,
+      "score": 3072,
+      "weights": {
+        "W_PASS": 3.7008700703042994,
+        "W_WEAK": 1.0229001058096194,
+        "W_JOKER": 8.0,
+        "W_PAIR": 4.0,
+        "W_DANGER": 2.7507803055138993,
+        "W_MINOPP": 3.65,
+        "W_ENDGAME": 3.0,
+        "W_ENDGAME_DEEP": 2.7,
+        "W_LEADER_WEAK": 0.6166318672194535,
+        "W_MULTI_LEAD": 1.5,
+        "W_ONE_MORE": 25.0
+      },
+      "accepted": false
+    },
+    {
+      "iter": 11,
+      "wins": 245,
+      "score": 3113,
+      "weights": {
+        "W_PASS": 3.7008700703042994,
+        "W_WEAK": 1.0999999999999999,
+        "W_JOKER": 8.0,
+        "W_PAIR": 4.0,
+        "W_DANGER": 2.7507803055138993,
+        "W_MINOPP": 3.5699685868191526,
+        "W_ENDGAME": 3.0,
+        "W_ENDGAME_DEEP": 3.0,
+        "W_LEADER_WEAK": 0.6166318672194535,
+        "W_MULTI_LEAD": 1.7,
+        "W_ONE_MORE": 25.0
+      },
+      "accepted": false
+    },
+    {
+      "iter": 12,
+      "wins": 231,
+      "score": 3033,
+      "weights": {
+        "W_PASS": 3.7008700703042994,
+        "W_WEAK": 1.2,
+        "W_JOKER": 9.421948044147062,
+        "W_PAIR": 4.0,
+        "W_DANGER": 2.7507803055138993,
+        "W_MINOPP": 4.0,
+        "W_ENDGAME": 3.715158067862447,
+        "W_ENDGAME_DEEP": 3.0,
+        "W_LEADER_WEAK": 0.6166318672194535,
+        "W_MULTI_LEAD": 1.7194265479514375,
+        "W_ONE_MORE": 25.0
+      },
+      "accepted": false
+    },
+    {
+      "iter": 13,
+      "wins": 250,
+      "score": 3072,
+      "weights": {
+        "W_PASS": 3.7008700703042994,
+        "W_WEAK": 1.0999999999999999,
+        "W_JOKER": 8.0,
+        "W_PAIR": 4.0,
+        "W_DANGER": 3.4371924771612687,
+        "W_MINOPP": 4.0,
+        "W_ENDGAME": 3.0,
+        "W_ENDGAME_DEEP": 3.0,
+        "W_LEADER_WEAK": 0.6166318672194535,
+        "W_MULTI_LEAD": 1.5,
+        "W_ONE_MORE": 27.25
+      },
+      "accepted": false
+    },
+    {
+      "iter": 14,
+      "wins": 226,
+      "score": 3036,
+      "weights": {
+        "W_PASS": 3.7008700703042994,
+        "W_WEAK": 1.2,
+        "W_JOKER": 8.0,
+        "W_PAIR": 4.0,
+        "W_DANGER": 2.7507803055138993,
+        "W_MINOPP": 4.0,
+        "W_ENDGAME": 3.0,
+        "W_ENDGAME_DEEP": 2.6766278468489877,
+        "W_LEADER_WEAK": 0.6916318672194535,
+        "W_MULTI_LEAD": 1.7,
+        "W_ONE_MORE": 25.0
+      },
+      "accepted": false
+    },
+    {
+      "iter": 15,
+      "wins": 267,
+      "score": 3105,
+      "weights": {
+        "W_PASS": 3.7008700703042994,
+        "W_WEAK": 1.2,
+        "W_JOKER": 7.218282170942522,
+        "W_PAIR": 4.0,
+        "W_DANGER": 2.9507803055138995,
+        "W_MINOPP": 4.0,
+        "W_ENDGAME": 3.0,
+        "W_ENDGAME_DEEP": 3.0,
+        "W_LEADER_WEAK": 0.6166318672194535,
+        "W_MULTI_LEAD": 1.1525325333928391,
+        "W_ONE_MORE": 25.0
+      },
+      "accepted": false
+    },
+    {
+      "iter": 16,
+      "wins": 241,
+      "score": 3049,
+      "weights": {
+        "W_PASS": 3.4508700703042994,
+        "W_WEAK": 1.0454154596722423,
+        "W_JOKER": 8.0,
+        "W_PAIR": 4.0,
+        "W_DANGER": 2.7507803055138993,
+        "W_MINOPP": 4.0,
+        "W_ENDGAME": 2.7,
+        "W_ENDGAME_DEEP": 3.0,
+        "W_LEADER_WEAK": 0.6166318672194535,
+        "W_MULTI_LEAD": 1.5,
+        "W_ONE_MORE": 25.0
+      },
+      "accepted": false
+    },
+    {
+      "iter": 17,
+      "wins": 258,
+      "score": 3093,
+      "weights": {
+        "W_PASS": 3.1745810478289003,
+        "W_WEAK": 1.2,
+        "W_JOKER": 8.0,
+        "W_PAIR": 3.7,
+        "W_DANGER": 2.7507803055138993,
+        "W_MINOPP": 4.0,
+        "W_ENDGAME": 3.0,
+        "W_ENDGAME_DEEP": 3.0,
+        "W_LEADER_WEAK": 0.6916318672194535,
+        "W_MULTI_LEAD": 1.5,
+        "W_ONE_MORE": 25.0
+      },
+      "accepted": false
+    },
+    {
+      "iter": 18,
+      "wins": 249,
+      "score": 3123,
+      "weights": {
+        "W_PASS": 3.7008700703042994,
+        "W_WEAK": 1.326893277615378,
+        "W_JOKER": 8.0,
+        "W_PAIR": 4.0,
+        "W_DANGER": 2.9507803055138995,
+        "W_MINOPP": 4.0,
+        "W_ENDGAME": 3.0,
+        "W_ENDGAME_DEEP": 3.0,
+        "W_LEADER_WEAK": 0.6166318672194535,
+        "W_MULTI_LEAD": 1.5,
+        "W_ONE_MORE": 22.75
+      },
+      "accepted": false
+    },
+    {
+      "iter": 19,
+      "wins": 278,
+      "score": 3140,
+      "weights": {
+        "W_PASS": 3.7008700703042994,
+        "W_WEAK": 1.0999999999999999,
+        "W_JOKER": 8.0,
+        "W_PAIR": 4.0,
+        "W_DANGER": 2.1829401594190587,
+        "W_MINOPP": 4.0,
+        "W_ENDGAME": 3.3,
+        "W_ENDGAME_DEEP": 3.0,
+        "W_LEADER_WEAK": 0.6166318672194535,
+        "W_MULTI_LEAD": 1.5,
+        "W_ONE_MORE": 25.0
+      },
+      "accepted": true
+    }
+  ]
+}

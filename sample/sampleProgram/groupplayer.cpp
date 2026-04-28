@@ -4,6 +4,7 @@
 //
 
 #include <algorithm>
+#include <cstdlib>
 #include <random>
 #include <vector>
 #include "card.h"
@@ -14,6 +15,48 @@
 namespace {
     // 全プレイヤー共通の乱数（再現性のため固定シード）
     static std::mt19937 g_rng(0xC0FFEE);
+
+    // 評価関数の重み（環境変数で上書き可、auto tuning 用）
+    //
+    // ※ 自動チューニング (800試合×50反復、ランダムサーチ) を試みたが、
+    //    複数回の検証で元の手調整値より良い weights は得られなかった。
+    //    1評価あたり 800 試合では SE ~1.6% で、改善幅 (~1〜2%) と同オーダー。
+    //    サンプル数を上げる、または CMA-ES などの賢い探索を使う必要がある。
+    //    現状はノイズに対してもう少し堅牢なチューニング基盤が必要。
+    struct Weights {
+        double pass        = 3.0;
+        double weak        = 1.2;
+        double joker       = 8.0;
+        double pair        = 4.0;
+        double danger      = 3.0;
+        double minOpp      = 4.0;
+        double endgame     = 3.0;
+        double endgameDeep = 3.0;
+        double leaderWeak  = 0.5;
+        double multiLead   = 1.5;
+        double oneMore     = 25.0;
+    };
+
+    static double getEnvDouble(const char *name, double defaultVal) {
+        const char *env = std::getenv(name);
+        return env ? std::atof(env) : defaultVal;
+    }
+
+    static Weights g_w = []() {
+        Weights w;
+        w.pass        = getEnvDouble("W_PASS", w.pass);
+        w.weak        = getEnvDouble("W_WEAK", w.weak);
+        w.joker       = getEnvDouble("W_JOKER", w.joker);
+        w.pair        = getEnvDouble("W_PAIR", w.pair);
+        w.danger      = getEnvDouble("W_DANGER", w.danger);
+        w.minOpp      = getEnvDouble("W_MINOPP", w.minOpp);
+        w.endgame     = getEnvDouble("W_ENDGAME", w.endgame);
+        w.endgameDeep = getEnvDouble("W_ENDGAME_DEEP", w.endgameDeep);
+        w.leaderWeak  = getEnvDouble("W_LEADER_WEAK", w.leaderWeak);
+        w.multiLead   = getEnvDouble("W_MULTI_LEAD", w.multiLead);
+        w.oneMore     = getEnvDouble("W_ONE_MORE", w.oneMore);
+        return w;
+    }();
 }
 
 // ----- 補助関数 -----
@@ -285,39 +328,40 @@ double Group1::scoreMove(const CardSet &move, const GameStatus &gstat) const {
 
     // 手札が少ないほど pass 確率の重みを上げる（終盤は通すことが重要）
     int hsize = hand.size();
-    double passWeight = 3.0;
-    if (hsize <= 5) passWeight = 6.0;
-    if (hsize <= 3) passWeight = 9.0;
-    if (hsize <= 1) passWeight = 12.0;
+    // pass重みは手札数に応じて動的に増加（基本値 g_w.pass）
+    double passWeight = g_w.pass;
+    if (hsize <= 5) passWeight = g_w.pass * 2.0;
+    if (hsize <= 3) passWeight = g_w.pass * 3.0;
+    if (hsize <= 1) passWeight = g_w.pass * 4.0;
 
-    // ジョーカー温存ペナルティも終盤は弱める（出し惜しみせず使う）
-    double jokerPenalty = 8.0;
-    if (hsize <= 4) jokerPenalty = 4.0;
+    // ジョーカー温存ペナルティも終盤は弱める
+    double jokerPenalty = g_w.joker;
+    if (hsize <= 4) jokerPenalty = g_w.joker * 0.5;
     if (hsize <= 2) jokerPenalty = 0.0;
 
     double score = 0.0;
     score += passWeight * pass;
-    score += (15 - strength) * 1.2;
+    score += (15 - strength) * g_w.weak;
     score -= useJoker ? jokerPenalty : 0.0;
     // ペア温存（手札が多いうちは強めに、終盤は弱めに）
-    double pairWeight = 4.0;
-    if (hsize <= 4) pairWeight = 2.0;
-    if (hsize <= 2) pairWeight = 0.5;
+    double pairWeight = g_w.pair;
+    if (hsize <= 4) pairWeight = g_w.pair * 0.5;
+    if (hsize <= 2) pairWeight = g_w.pair * 0.125;
     score -= pairBroken * pairWeight;
 
     // ライバル接近時の止め強化（人数で重みを倍化）
-    if (dangerCount > 0) score += dangerCount * 3.0 * pass;
-    if (minOpp <= 1) score += 4.0;  // 誰かリーチなら出すこと自体に価値
+    if (dangerCount > 0) score += dangerCount * g_w.danger * pass;
+    if (minOpp <= 1) score += g_w.minOpp;  // 誰かリーチなら出すこと自体に価値
 
     // 終盤は積極的に出す（パスのベースライン 0 を超えやすくする）
-    if (hsize <= 5) score += 3.0;
-    if (hsize <= 3) score += 3.0;  // 追加ボーナス
+    if (hsize <= 5) score += g_w.endgame;
+    if (hsize <= 3) score += g_w.endgameDeep;  // 追加ボーナス
 
     if (gstat.pile.size() == 0) {
-        score += (15 - strength) * 0.5;
+        score += (15 - strength) * g_w.leaderWeak;
         // 複数枚リード（ペア・トリプルなど）は相手の選択肢を狭めるのでボーナス
-        if ((int)move.size() >= 2) score += 1.5;
-        if ((int)move.size() >= 3) score += 1.5;
+        if ((int)move.size() >= 2) score += g_w.multiLead;
+        if ((int)move.size() >= 3) score += g_w.multiLead;
     }
 
     // この手を出すと上がる／あと1手で上がれる、を判定
@@ -344,7 +388,7 @@ double Group1::scoreMove(const CardSet &move, const GameStatus &gstat) const {
         }
         // 残り手札が「同じランクのみ」または「ジョーカーのみ」なら1手で上がれる
         bool oneMore = (remDistinct == 0 && remHasJoker) || (remDistinct == 1);
-        if (oneMore) score += 25.0;
+        if (oneMore) score += g_w.oneMore;
     }
 
     return score;
