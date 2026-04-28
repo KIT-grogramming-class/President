@@ -15,14 +15,15 @@
 #include "simpleplayer.h"
 #include "defaultplayer.h"
 #include "thinkTA1.h"
+#include "groupplayer.h"
 #include "dealer.h"
 
 void registerPlayers(Dealer & d) {
-    d.regist(new DefaultPlayer("Default1")); 
-    d.regist(new DefaultPlayer("Default2")); 
-    d.regist(new  SimplePlayer("Simple1 ")); 
-    d.regist(new  SimplePlayer("Simple2 ")); 
-    d.regist(new      ThinkTA1("ThinkTA1")); 
+    d.regist(new DefaultPlayer("Default1"));
+    d.regist(new  SimplePlayer("Simple1 "));
+    d.regist(new  SimplePlayer("Simple2 "));
+    d.regist(new      ThinkTA1("ThinkTA1"));
+    d.regist(new        Group1("Group1  "));               // 解析的pass確率（v2.1）
 }
 
 int main (int argc, char * const argv[]) {
