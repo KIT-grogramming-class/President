@@ -21,7 +21,6 @@ void registerPlayers(Dealer & d) {
     d.regist(new DefaultPlayer("Default1")); 
     d.regist(new DefaultPlayer("Default2")); 
     d.regist(new  SimplePlayer("Simple1 ")); 
-    d.regist(new  SimplePlayer("Simple2 ")); 
     d.regist(new      ThinkTA1("ThinkTA1")); 
 }
 

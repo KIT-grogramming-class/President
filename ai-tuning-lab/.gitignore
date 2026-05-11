@@ -1,0 +1,7 @@
+sampleProgramForMac/daifugou
+sampleProgramForMac/*.o
+sampleProgramForMac/libplayingcards-mac.a
+sampleProgramForMac/*~
+__pycache__/
+*.pyc
+results.csv

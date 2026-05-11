@@ -40,10 +40,12 @@ public:
 
     // 比較関数(ソート用)
     static bool myCardCmp(const Card &a, const Card &b) {
-      return a.strength() <= b.strength();
+      if (a.strength() != b.strength()) {
+        return a.strength() < b.strength();
+      }
+      return a.suit() < b.suit();
     }
 
 };
 
 #endif
-

@@ -1,14 +1,32 @@
-# Makefile 
-CC	     = gcc -std=c99
-CXX	     = g++ -std=c++11
+# Makefile
+CC       = gcc -std=c99
+CXX      = g++ -std=c++11
 
 CFLAGS   = -Wall -g
 CXXFLAGS = -Wall -g
 
-HEADERS = card.h cardset.h dealer.h gamestatus.h player.h \
-          simpleplayer.h defaultplayer.h thinkTA1.h 
-OBJS = card.o cardset.cpp dealer.o player.o simpleplayer.o defaultplayer.o
+UNAME_S := $(shell uname -s)
+UNAME_M := $(shell uname -m)
 
+HEADERS = card.h cardset.h dealer.h gamestatus.h player.h \
+          simpleplayer.h defaultplayer.h thinkTA1.h
+CORE_OBJS = dealer.o player.o simpleplayer.o defaultplayer.o
+
+PLAYINGCARDS_LIB = libplayingcards.a
+
+ifeq ($(UNAME_S),Darwin)
+PLAYINGCARDS_LIB = libplayingcards-mac.a
+
+ifeq ($(UNAME_M),arm64)
+MAC_THINKTA1_OBJ = ../macLib/thinkTA1-for-mac-arm64.o
+else ifeq ($(UNAME_M),x86_64)
+MAC_THINKTA1_OBJ = ../macLib/thinkTA1-for-mac-x86-64.o
+else
+$(error Unsupported macOS architecture: $(UNAME_M))
+endif
+endif
+
+.PHONY: all lib depend clean
 .SUFFIXES: .o .cc .cpp .c++ .c
 
 #.c.o: $(HEADERS)
@@ -23,19 +41,27 @@ OBJS = card.o cardset.cpp dealer.o player.o simpleplayer.o defaultplayer.o
 all: daifugou
 	@echo "build finished."
 
-daifugou: daifugou.o $(OBJS) $(HEADERS) libplayingcards.a
-	$(CXX) daifugou.o $(OBJS) -o daifugou -L. -lplayingcards
+daifugou: daifugou.o $(CORE_OBJS) $(HEADERS) $(PLAYINGCARDS_LIB)
+	$(CXX) daifugou.o $(CORE_OBJS) $(PLAYINGCARDS_LIB) -o daifugou
 
-lib: libplayingcards.a
+lib: $(PLAYINGCARDS_LIB)
 
-#libplayingcards.a: card.o cardset.o thinkTA1.o
-#	ar rcs libplayingcards.a card.o cardset.o thinkTA1.o
+ifeq ($(UNAME_S),Darwin)
+libplayingcards-mac.a: card.o cardset.o $(MAC_THINKTA1_OBJ)
+	/bin/rm -f $@ thinkTA1.o
+	cp $(MAC_THINKTA1_OBJ) thinkTA1.o
+	ar rcs $@ card.o cardset.o thinkTA1.o
+	/bin/rm -f thinkTA1.o
+else
+libplayingcards.a:
+	@test -f $@ || (echo "Missing $@. Re-extract the sample package." && exit 1)
+endif
 
 depend:
 	makedepend *.cpp
 
 clean   :
-	/bin/rm -f core daifugou *.o *~
+	/bin/rm -f core daifugou *.o libplayingcards-mac.a *~
 #	rm -f core daifugou `echo *.o | sed -e 's/ThinkTA1.o//'` *~
 
 # DO NOT DELETE
