@@ -17,7 +17,29 @@
 #include "gamestatus.h"
 
 class Group1 : public Player {
+public:
+    // 評価関数の重み。インスタンスごとに保持し、self-play で複数の Group1
+    // を別重みで対戦させられるようにしている。
+    struct Weights {
+        double pass        = 3.0;
+        double weak        = 1.2;
+        double joker       = 8.0;
+        double pair        = 4.0;
+        double danger      = 3.0;
+        double minOpp      = 4.0;
+        double endgame     = 3.0;
+        double endgameDeep = 3.0;
+        double leaderWeak  = 0.5;
+        double multiLead   = 1.5;
+        double oneMore     = 25.0;
+
+        // 環境変数から重みを構築する。prefix は "" / "A_" / "B_" などで、
+        // それぞれ W_PASS, A_W_PASS, B_W_PASS のように読み分ける。
+        static Weights fromEnv(const char *prefix = "");
+    };
+
 private:
+    Weights w;
     CardSet played;       // ゲーム中に出たカードの累積
     bool    useMC;        // true: MCでpass確率を計算 / false: 解析的
     int     mcSamples;    // MCのサンプル数
@@ -71,8 +93,13 @@ public:
           useMCPlayout(mcPlayout), mcPlayoutSamples(playoutSamples),
           mcPlayoutThreshold(playoutThreshold) {
         played.clear();
+        // 既定では無接頭辞の env var (W_PASS 等) を読み込み、現状互換を維持する。
+        w = Weights::fromEnv("");
     }
     ~Group1() { }
+
+    // self-play 用: 同一プロセスに重み違いの Group1 を並べたいときに使う。
+    void setWeights(const Weights &nw) { w = nw; }
 
     void ready();
     bool follow(const GameStatus &gstat, CardSet &cards);
