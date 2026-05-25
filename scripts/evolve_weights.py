@@ -88,8 +88,8 @@ def mutate(parent: dict, rng: random.Random) -> dict:
     return child
 
 
-WIN_REGEX_A = re.compile(r'Group1A\s*:\s*\d+\s*:\s*(\d+)')
-WIN_REGEX_B = re.compile(r'Group1B\s*:\s*\d+\s*:\s*(\d+)')
+WIN_REGEX_A = re.compile(r'Group3A\s*:\s*\d+\s*:\s*(\d+)')
+WIN_REGEX_B = re.compile(r'Group3B\s*:\s*\d+\s*:\s*(\d+)')
 
 
 def play_match(a_weights: dict, b_weights: dict, n_games: int) -> tuple[int, int]:
