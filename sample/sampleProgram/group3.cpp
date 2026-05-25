@@ -12,7 +12,7 @@
 #include "card.h"
 #include "cardset.h"
 #include "gamestatus.h"
-#include "groupplayer.h"
+#include "group3.h"
 
 namespace {
     // 全プレイヤー共通の乱数（再現性のため固定シード）
