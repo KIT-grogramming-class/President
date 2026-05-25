@@ -16,7 +16,7 @@
 #include "player.h"
 #include "gamestatus.h"
 
-class Group1 : public Player {
+class Group3 : public Player {
 public:
     // 評価関数の重み。インスタンスごとに保持し、self-play で複数の Group1
     // を別重みで対戦させられるようにしている。
@@ -89,7 +89,7 @@ private:
     int  mcPlayoutThreshold;  // 手札枚数 <= これで発動
 
 public:
-    Group1(const char *name = "Group1", bool mc = false, int samples = 20,
+    Group3(const char *name = "Group1", bool mc = false, int samples = 20,
            int egThreshold = 4, bool mcPlayout = false, int playoutSamples = 15,
            int playoutThreshold = 5)
         : Player(name), useMC(mc), mcSamples(samples), endgameThreshold(egThreshold),
@@ -99,7 +99,7 @@ public:
         // 既定では無接頭辞の env var (W_PASS 等) を読み込み、現状互換を維持する。
         w = Weights::fromEnv("");
     }
-    ~Group1() { }
+    ~Group3() { }
 
     // self-play 用: 同一プロセスに重み違いの Group1 を並べたいときに使う。
     void setWeights(const Weights &nw) { w = nw; }

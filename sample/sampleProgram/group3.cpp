@@ -1,6 +1,6 @@
 //
 //  groupplayer.cpp
-//  Group1 プレイヤー（v3: MCモード追加）
+//  Group3 プレイヤー（v3: MCモード追加）
 //
 
 #include <algorithm>
@@ -20,9 +20,9 @@ namespace {
 }
 
 // 評価関数の重みを env から読み込む静的ファクトリ。
-// prefix を変えれば同一プロセスに別重みの Group1 を並べられる（self-play 用）。
-Group1::Weights Group1::Weights::fromEnv(const char *prefix) {
-    Group1::Weights w;
+// prefix を変えれば同一プロセスに別重みの Group3 を並べられる（self-play 用）。
+Group3::Weights Group3::Weights::fromEnv(const char *prefix) {
+    Group3::Weights w;
     const char *p = prefix ? prefix : "";
 
     auto get = [&](const char *suffix, double defaultVal) -> double {
@@ -48,14 +48,14 @@ Group1::Weights Group1::Weights::fromEnv(const char *prefix) {
 
 // ----- 補助関数 -----
 
-Card Group1::pileLead(const CardSet &pile) const {
+Card Group3::pileLead(const CardSet &pile) const {
     for (int i = 0; i < pile.size(); i++) {
         if (!pile.at(i).isJoker()) return pile.at(i);
     }
     return pile.size() > 0 ? pile.at(0) : Card();
 }
 
-int Group1::countByRank(int rank) const {
+int Group3::countByRank(int rank) const {
     int n = 0;
     for (int i = 0; i < hand.size(); i++) {
         if (!hand.at(i).isJoker() && hand.at(i).rank() == rank) n++;
@@ -63,21 +63,21 @@ int Group1::countByRank(int rank) const {
     return n;
 }
 
-bool Group1::hasJoker() const {
+bool Group3::hasJoker() const {
     for (int i = 0; i < hand.size(); i++) {
         if (hand.at(i).isJoker()) return true;
     }
     return false;
 }
 
-Card Group1::getJoker() const {
+Card Group3::getJoker() const {
     for (int i = 0; i < hand.size(); i++) {
         if (hand.at(i).isJoker()) return hand.at(i);
     }
     return Card();
 }
 
-int Group1::unseenCountOfRank(int rank) const {
+int Group3::unseenCountOfRank(int rank) const {
     int total = 4;
     for (int i = 0; i < played.size(); i++) {
         if (!played.at(i).isJoker() && played.at(i).rank() == rank) total--;
@@ -88,7 +88,7 @@ int Group1::unseenCountOfRank(int rank) const {
     return std::max(0, total);
 }
 
-bool Group1::unseenJoker() const {
+bool Group3::unseenJoker() const {
     for (int i = 0; i < played.size(); i++) {
         if (played.at(i).isJoker()) return false;
     }
@@ -100,7 +100,7 @@ bool Group1::unseenJoker() const {
 
 // ----- 候補手の列挙 -----
 
-std::vector<CardSet> Group1::enumerateMoves(const CardSet &pile) const {
+std::vector<CardSet> Group3::enumerateMoves(const CardSet &pile) const {
     std::vector<CardSet> moves;
     int leadSize = pile.size();
     bool isLeader = (leadSize == 0);
@@ -151,7 +151,7 @@ std::vector<CardSet> Group1::enumerateMoves(const CardSet &pile) const {
 
 // ----- 解析的pass確率 -----
 
-double Group1::analyticalPassProb(const CardSet &move, int leadSize) const {
+double Group3::analyticalPassProb(const CardSet &move, int leadSize) const {
     int moveRank = -1;
     bool useJoker = false;
     for (int i = 0; i < move.size(); i++) {
@@ -193,7 +193,7 @@ double Group1::analyticalPassProb(const CardSet &move, int leadSize) const {
 // ----- MCベースpass確率 -----
 // 相手の手札を実際にサンプリングして、誰かが返せるかを K 回試行
 
-double Group1::mcPassProb(const CardSet &move, int leadSize,
+double Group3::mcPassProb(const CardSet &move, int leadSize,
                           const GameStatus &gstat) const {
     int moveRank = -1;
     bool useJoker = false;
@@ -274,7 +274,7 @@ double Group1::mcPassProb(const CardSet &move, int leadSize,
 
 // ----- 手の点数評価 -----
 
-double Group1::scoreMove(const CardSet &move, const GameStatus &gstat) const {
+double Group3::scoreMove(const CardSet &move, const GameStatus &gstat) const {
     int leadSize = gstat.pile.size();
     int effSize = (leadSize == 0) ? (int)move.size() : leadSize;
 
@@ -383,7 +383,7 @@ double Group1::scoreMove(const CardSet &move, const GameStatus &gstat) const {
 
 // ----- 終盤ルックアヘッド -----
 
-int Group1::minPlaysFromHand(const CardSet &h) const {
+int Group3::minPlaysFromHand(const CardSet &h) const {
     if (h.size() == 0) return 0;
     int rankCount[14] = {0};
     bool hasJokerLocal = false;
@@ -399,7 +399,7 @@ int Group1::minPlaysFromHand(const CardSet &h) const {
     return distinct;
 }
 
-int Group1::endgameLookahead(const std::vector<CardSet> &moves,
+int Group3::endgameLookahead(const std::vector<CardSet> &moves,
                              const GameStatus &gstat) const {
     if (moves.empty()) return -1;
 
@@ -607,7 +607,7 @@ int runPlayout(SimGame &g, int maxSteps = 500) {
 
 }  // namespace
 
-int Group1::mcPlayoutSelect(const std::vector<CardSet> &moves,
+int Group3::mcPlayoutSelect(const std::vector<CardSet> &moves,
                             const GameStatus &gstat) const {
     if (moves.empty()) return -1;
 
@@ -695,12 +695,12 @@ int Group1::mcPlayoutSelect(const std::vector<CardSet> &moves,
 
 // ----- インターフェース -----
 
-void Group1::ready() {
+void Group3::ready() {
     played.clear();
     hand.sort(weakFirst);
 }
 
-bool Group1::approve(const GameStatus &gstat) {
+bool Group3::approve(const GameStatus &gstat) {
     for (int i = 0; i < gstat.pile.size(); i++) {
         Card c = gstat.pile.at(i);
         if (!played.includes(c)) {
@@ -710,7 +710,7 @@ bool Group1::approve(const GameStatus &gstat) {
     return true;
 }
 
-bool Group1::follow(const GameStatus &gstat, CardSet &cards) {
+bool Group3::follow(const GameStatus &gstat, CardSet &cards) {
     CardSet pile(gstat.pile);
     bool isLeader = (pile.size() == 0);
 
