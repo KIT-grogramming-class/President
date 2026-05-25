@@ -21,17 +21,20 @@ public:
     // 評価関数の重み。インスタンスごとに保持し、self-play で複数の Group1
     // を別重みで対戦させられるようにしている。
     struct Weights {
-        double pass        = 3.0;
-        double weak        = 1.2;
-        double joker       = 8.0;
-        double pair        = 4.0;
-        double danger      = 3.0;
-        double minOpp      = 4.0;
-        double endgame     = 3.0;
-        double endgameDeep = 3.0;
-        double leaderWeak  = 0.5;
-        double multiLead   = 1.5;
-        double oneMore     = 25.0;
+        // 進化チューニング (scripts/evolve_weights.py, gen 0) で得たベスト値。
+        // 公式卓 10000 games × 3 試行で baseline (v2.7 手調整) 30.63% → 31.04%
+        // (+0.41pp)。本番環境は env var で渡せないため、ここに固定値として埋める。
+        double pass        = 3.5234;
+        double weak        = 1.0637;
+        double joker       = 10.0464;
+        double pair        = 4.7102;
+        double danger      = 2.0020;
+        double minOpp      = 7.3682;
+        double endgame     = 5.8967;
+        double endgameDeep = 4.8613;
+        double leaderWeak  = 1.3532;
+        double multiLead   = 1.2406;
+        double oneMore     = 37.8424;
 
         // 環境変数から重みを構築する。prefix は "" / "A_" / "B_" などで、
         // それぞれ W_PASS, A_W_PASS, B_W_PASS のように読み分ける。
