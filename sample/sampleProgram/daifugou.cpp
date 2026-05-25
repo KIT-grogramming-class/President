@@ -15,14 +15,32 @@
 #include "simpleplayer.h"
 #include "defaultplayer.h"
 #include "thinkTA1.h"
+#include "groupplayer.h"
 #include "dealer.h"
 
 void registerPlayers(Dealer & d) {
-    d.regist(new DefaultPlayer("Default1")); 
-    d.regist(new DefaultPlayer("Default2")); 
-    d.regist(new  SimplePlayer("Simple1 ")); 
-    d.regist(new  SimplePlayer("Simple2 ")); 
-    d.regist(new      ThinkTA1("ThinkTA1")); 
+    // 通常は提出用の公式卓構成 (Default + Simple×2 + ThinkTA1 + Group1)。
+    // 環境変数 PLAYERS=selfplay のときは TA1 を外して Group1 を 2 体並べる
+    // self-play 卓に切替（重みは A_ / B_ の env 接頭辞で分離）。
+    const char *mode = std::getenv("PLAYERS");
+    if (mode && std::string(mode) == "selfplay") {
+        d.regist(new DefaultPlayer("Default1"));
+        d.regist(new  SimplePlayer("Simple1 "));
+        d.regist(new  SimplePlayer("Simple2 "));
+        Group1 *gA = new Group1("Group1A ", false, 20, 4, true, 15, 5);
+        gA->setWeights(Group1::Weights::fromEnv("A_"));
+        d.regist(gA);
+        Group1 *gB = new Group1("Group1B ", false, 20, 4, true, 15, 5);
+        gB->setWeights(Group1::Weights::fromEnv("B_"));
+        d.regist(gB);
+        return;
+    }
+
+    d.regist(new DefaultPlayer("Default1"));
+    d.regist(new  SimplePlayer("Simple1 "));
+    d.regist(new  SimplePlayer("Simple2 "));
+    d.regist(new      ThinkTA1("ThinkTA1"));
+    d.regist(new        Group1("Group1  ", false, 20, 4, true, 15, 5));  // v2.7 (MC playout)
 }
 
 int main (int argc, char * const argv[]) {
